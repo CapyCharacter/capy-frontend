@@ -1,101 +1,136 @@
-import Image from "next/image";
+import CharacterCard from "./components/cards/CharacterCard";
+import Section from "./components/Section";
+import CardContainer from "./components/CardContainer";
 
 export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="https://nextjs.org/icons/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+  const featuredCharacters = [
+    {
+      name: "Sherlock Holmes",
+      creator: "Arthur Conan Doyle",
+      description: "Brilliant detective with exceptional deductive skills, known for his sharp wit and ability to solve complex cases.",
+      chats: 1000,
+      avatarUrl: "/images/fake-character-image.avif"
+    },
+    {
+      name: "Elizabeth Bennet",
+      creator: "Jane Austen",
+      description: "Witty and intelligent protagonist from Pride and Prejudice",
+      chats: 800,
+      avatarUrl: "/images/fake-character-image.avif"
+    },
+    {
+      name: "Tony Stark",
+      creator: "Stan Lee",
+      description: "Genius billionaire playboy philanthropist, also known as Iron Man",
+      chats: 1500,
+      avatarUrl: "/images/fake-character-image.avif"
+    },
+    {
+      name: "Hermione Granger",
+      creator: "J.K. Rowling",
+      description: "Brightest witch of her age from the Harry Potter series",
+      chats: 1200,
+      avatarUrl: "/images/fake-character-image.avif"
+    },
+    {
+      name: "Gandalf",
+      creator: "J.R.R. Tolkien",
+      description: "Wise and powerful wizard from The Lord of the Rings",
+      chats: 1700,
+      avatarUrl: "/images/fake-character-image.avif"
+    },
+    {
+      name: "Lisbeth Salander",
+      creator: "Stieg Larsson",
+      description: "Brilliant hacker and investigator from The Girl with the Dragon Tattoo series",
+      chats: 900,
+      avatarUrl: "/images/fake-character-image.avif"
+    }
+  ];
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="https://nextjs.org/icons/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
+  const recommendedCharacters = [
+    {
+      name: "Darth Vader",
+      creator: "George Lucas",
+      description: "Iconic Star Wars villain, formerly Anakin Skywalker, now a powerful Sith Lord.",
+      chats: 2000,
+      avatarUrl: "/images/fake-character-image.avif"
+    },
+    {
+      name: "Katniss Everdeen",
+      creator: "Suzanne Collins",
+      description: "Brave and resourceful protagonist from The Hunger Games trilogy.",
+      chats: 950,
+      avatarUrl: "/images/fake-character-image.avif"
+    },
+    {
+      name: "Sherlock Holmes",
+      creator: "Arthur Conan Doyle",
+      description: "Brilliant detective with exceptional deductive skills and sharp wit.",
+      chats: 1800,
+      avatarUrl: "/images/fake-character-image.avif"
+    },
+    {
+      name: "Wonder Woman",
+      creator: "William Moulton Marston",
+      description: "Amazonian warrior princess and DC Comics superhero.",
+      chats: 1600,
+      avatarUrl: "/images/fake-character-image.avif"
+    },
+    {
+      name: "Atticus Finch",
+      creator: "Harper Lee",
+      description: "Moral and compassionate lawyer from To Kill a Mockingbird.",
+      chats: 1100,
+      avatarUrl: "/images/fake-character-image.avif"
+    },
+    {
+      name: "Lara Croft",
+      creator: "Toby Gard",
+      description: "Adventurous archaeologist and protagonist of the Tomb Raider series.",
+      chats: 1400,
+      avatarUrl: "/images/fake-character-image.avif"
+    },
+    {
+      name: "Tyrion Lannister",
+      creator: "George R.R. Martin",
+      description: "Witty and cunning character from A Song of Ice and Fire series.",
+      chats: 1900,
+      avatarUrl: "/images/fake-character-image.avif"
+    }
+  ];
+
+  return (
+    <main>
+      <Section title="Featured Characters">
+        <CardContainer>
+          {featuredCharacters.map((character, index) => (
+            <CharacterCard
+              key={index}
+              name={character.name}
+              creator={character.creator}
+              description={character.description}
+              chats={character.chats}
+              avatarUrl={character.avatarUrl}
             />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
+          ))}
+        </CardContainer>
+      </Section>
+
+      <Section title="Recommended for You">
+        <CardContainer>
+          {recommendedCharacters.map((character, index) => (
+            <CharacterCard
+              key={index}
+              name={character.name}
+              creator={character.creator}
+              description={character.description}
+              chats={character.chats}
+              avatarUrl={character.avatarUrl}
+            />
+          ))}
+        </CardContainer>
+      </Section>
+    </main>
   );
 }
