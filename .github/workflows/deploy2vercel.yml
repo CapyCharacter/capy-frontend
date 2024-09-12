@@ -1,0 +1,51 @@
+name: Deploy to Vercel
+on:
+    push:
+        branches: [main]
+
+jobs:
+    Deploy:
+        runs-on: ubuntu-22.04
+        defaults:
+            run:
+                working-directory: .
+        steps:
+            - uses: actions/checkout@v4
+
+            - uses: actions/cache@v4
+              with:
+                # See here for caching with `yarn` https://github.com/actions/cache/blob/main/examples.md#node---yarn or you can leverage caching with actions/setup-node https://github.com/actions/setup-node
+                path: |
+                  ~/.npm
+                  ${{ github.workspace }}/.next/cache
+                # Generate a new cache whenever packages or source files change.
+                key: ${{ runner.os }}-nextjs-${{ hashFiles('**/package-lock.json') }}-${{ hashFiles('**/*.js', '**/*.jsx', '**/*.ts', '**/*.tsx') }}
+                # If source files changed but packages didn't, rebuild from a prior cache.
+                restore-keys: |
+                  ${{ runner.os }}-nextjs-${{ hashFiles('**/package-lock.json') }}-
+
+            - uses: actions/setup-node@v4
+              with:
+                node-version: 20
+            
+            - name: Prepare Environment Variables
+              env:
+                APP_ENVIRONMENT_VARIABLES: ${{ secrets.APP_ENVIRONMENT_VARIABLES }}
+              run: echo -e $APP_ENVIRONMENT_VARIABLES > .env.local
+            
+            - run: npm ci
+            - run: npm run build
+            - run: npm test
+            - run: npm i -g vercel@latest
+
+            - name: Link Vercel Project
+              env:
+                VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+                VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+                VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+              run: vercel link --yes --project $VERCEL_PROJECT_ID --scope $VERCEL_ORG_ID -t $VERCEL_TOKEN
+
+            - name: Deploy to Vercel
+              env:
+                VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+              run: vercel --yes --prod -t $VERCEL_TOKEN
