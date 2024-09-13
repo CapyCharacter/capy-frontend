@@ -29,7 +29,7 @@ const Message: React.FC<MessageProps> = ({ content, avatarSrc, senderName, sentB
         )}
       </div>
       <div className={`p-3 rounded-lg break-words inline-block ${sentByUser ? 'bg-blue-500 text-white' : 'bg-white'}`}>
-        <p className={`${sentByUser ? 'text-white' : 'text-gray-800'}`}>{content}</p>
+        <p className={`${sentByUser ? 'text-white' : 'text-gray-800'}`} dangerouslySetInnerHTML={{ __html: content.replaceAll('\n', '<br />') }} />
       </div>
     </div>
   );

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import CharacterInfoInChat from '@/components/chatbox/CharacterInfoInChat';
 import { useMobileContext } from '@/components/_common/MobileDetectionProvider';
 import MessageInput from '@/components/chatbox/MessageInput';
@@ -18,6 +18,11 @@ interface MessageData {
 const ChatPage: React.FC<ChatPageProps> = ({ params: { conversation_id } }) => {
   const [messages, setMessages] = useState<MessageData[]>([]);
   const isMobile = useMobileContext();
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
 
   useEffect(() => {
     // TODO: Fetch messages for the given conversation_id
@@ -26,6 +31,10 @@ const ChatPage: React.FC<ChatPageProps> = ({ params: { conversation_id } }) => {
 
     // const numericConversationId = parseInt(conversation_id, 10);
   }, [conversation_id]);
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
 
   const handleSendMessage = (message: string) => {
     setMessages([...messages, { content: message, sentByUser: true }]);
@@ -51,6 +60,7 @@ const ChatPage: React.FC<ChatPageProps> = ({ params: { conversation_id } }) => {
               sentByUser={message.sentByUser}
             />
           ))}
+          <div ref={messagesEndRef} />
         </div>
         <div className="sticky bottom-0 bg-white">
           <MessageInput onSendMessage={handleSendMessage} />
