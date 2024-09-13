@@ -21,6 +21,7 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   expandPopupMenuOnClick?: boolean;
   displayExpandPopupMenuIcon?: boolean;
   roundIcon?: boolean;
+  centerText?: boolean;
 }
 
 const Button = ({
@@ -36,6 +37,7 @@ const Button = ({
   expandPopupMenuOnClick = false,
   displayExpandPopupMenuIcon = false,
   roundIcon = false,
+  centerText = false,
   ...props
 }: ButtonProps) => {
   const [isSubmenuOpen, setIsSubmenuOpen] = useState(false);
@@ -43,8 +45,8 @@ const Button = ({
 
   const baseClasses = 'flex items-center px-4 py-2 transition-colors duration-150 ease-in-out';
   const variantClasses = {
-    primary: 'bg-white text-gray-800 hover:bg-gray-100',
-    secondary: 'bg-gray-100 text-gray-800 hover:bg-gray-200',
+    primary: 'bg-gray-100 text-gray-800 hover:bg-gray-200',
+    secondary: 'bg-white text-gray-800 hover:bg-gray-100',
     void: 'bg-transparent text-gray-800 hover:bg-gray-100',
   };
   const shapeClasses = {
@@ -88,14 +90,14 @@ const Button = ({
     <>
       <button
         ref={buttonRef}
-        className={`${baseClasses} ${variantClasses[variant]} ${shapeClasses[shape]} ${className} relative`}
+        className={`${baseClasses} ${variantClasses[variant]} ${shapeClasses[shape]} ${className} relative ${centerText ? 'justify-center' : ''}`}
         onClick={handleClick}
         {...props}
       >
         {icon && iconPosition === 'left' && (
           <Image src={icon} alt="" width={iconSize} height={iconSize} className={`mr-2 ${iconClasses}`} />
         )}
-        <span>{label}</span>
+        <span className={centerText ? 'flex-grow text-center' : ''}>{label}</span>
         {icon && iconPosition === 'right' && (
           <Image src={icon} alt="" width={iconSize} height={iconSize} className={`ml-2 ${iconClasses}`} />
         )}
