@@ -1,6 +1,6 @@
-import CharacterCard from "./components/cards/CharacterCard";
-import Section from "./components/Section";
-import CardContainer from "./components/CardContainer";
+import CharacterCard from "../components/cards/CharacterCard";
+import Section from "../components/_common/Section";
+import CardContainer from "../components/cards/CardContainer";
 
 export default function Home() {
   const featuredCharacters = [
@@ -101,7 +101,7 @@ export default function Home() {
   ];
 
   return (
-    <main>
+    <main className="pt-4 px-4">
       <Section title="Featured Characters">
         <CardContainer>
           {featuredCharacters.map((character, index) => (

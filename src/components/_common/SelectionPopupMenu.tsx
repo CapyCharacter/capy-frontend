@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState, useRef, useCallback, SetStateAction, Dispatch } from 'react';
 import Image from 'next/image';
+import { subscribeToCloseAllPopups } from '@/utils/forceCloseAllPopups';
 
 interface MenuItem {
   label: string;
@@ -23,6 +24,8 @@ interface SelectionPopupMenuProps {
 
 export type CurrentRelativePosition = 'above' | 'below' | 'left' | 'right';
 
+const POPUP_STATE_CHANGE_EVENT = 'popupStateChange';
+
 const SelectionPopupMenu: React.FC<SelectionPopupMenuProps> = ({ 
   items, 
   isOpen, 
@@ -41,6 +44,7 @@ const SelectionPopupMenu: React.FC<SelectionPopupMenuProps> = ({
     }
 
     if (menuRef.current && anchorEl.current) {
+      console.log('updatePosition');
       const menuRect = menuRef.current.getBoundingClientRect();
       const anchorRect = anchorEl.current.getBoundingClientRect();
       
@@ -93,33 +97,61 @@ const SelectionPopupMenu: React.FC<SelectionPopupMenuProps> = ({
       setPosition({ top, left });
       setCurrentRelativePosition(relativePosition);
     }
-  }, [anchorEl, relativeAlign, setCurrentRelativePosition, setPosition]);
+  }, [menuRef, anchorEl, relativeAlign, setCurrentRelativePosition, setPosition]);
 
   useEffect(() => {
-    updatePosition();
     window.addEventListener('resize', () => updatePosition());
+    return () => {
+      window.removeEventListener('resize', () => updatePosition());
+    };
   }, [updatePosition]);
 
   useEffect(() => {
-    updatePosition();
+    const handleMessage = (event: MessageEvent) => {
+      if (event.data && event.data.type === POPUP_STATE_CHANGE_EVENT) {
+        setTimeout(() => {
+          console.log('updatePosition FINAL');
+          updatePosition();
+        }, 200);
+      }
+    };
+
+    window.addEventListener('message', handleMessage);
+
+    return () => {
+      window.removeEventListener('message', handleMessage);
+    };
+  }, [updatePosition]);
+
+  useEffect(() => {
+    window.postMessage({ type: POPUP_STATE_CHANGE_EVENT, isOpen }, '*');
+
     if (isOpen) {
       // Add click event listener to capture clicks outside the popup
       const handleOutsideClick = (event: MouseEvent) => {
-        if (menuRef.current && !menuRef.current.contains(event.target as Node) && 
-            anchorEl.current && !anchorEl.current.contains(event.target as Node)) {
-          event.preventDefault();
-          event.stopPropagation();
+        if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
           onClose();
         }
       };
       document.addEventListener('click', handleOutsideClick);
 
       return () => {
-        window.removeEventListener('resize', () => updatePosition());
         document.removeEventListener('click', handleOutsideClick);
       };
     }
-  }, [isOpen, updatePosition, onClose, anchorEl]);
+  }, [isOpen, onClose]);
+
+  useEffect(() => {
+    const unsubscribe = subscribeToCloseAllPopups(() => {
+      if (isOpen) {
+        onClose();
+      }
+    });
+
+    return () => {
+      unsubscribe();
+    };
+  }, [isOpen, onClose]);
 
   return (
     <div
