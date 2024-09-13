@@ -114,12 +114,13 @@ const UserProfile = () => {
       <Button
         label="Username"
         variant="secondary"
-        icon="/images/icons/user.svg"
+        icon="/images/fake-character-image.avif"
         className="w-full"
         submenuItems={menuItems}
         popupRelativeAlign="above_or_below"
         expandPopupMenuOnClick={true}
         displayExpandPopupMenuIcon={true}
+        roundIcon={true}
       />
     </div>
   );
