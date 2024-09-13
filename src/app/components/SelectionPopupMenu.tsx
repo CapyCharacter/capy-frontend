@@ -9,13 +9,15 @@ interface MenuItem {
   onClick: () => void;
 }
 
+export type RelativeAlign = 'above_or_below' | 'left_or_right';
+
 interface SelectionPopupMenuProps {
   items: MenuItem[];
   isOpen: boolean;
   onClose: () => void;
   className?: string;
   anchorEl: React.RefObject<HTMLElement>;
-  relativeAlign?: 'above_or_below' | 'left_or_right';
+  relativeAlign?: RelativeAlign;
   setCurrentRelativePosition: Dispatch<SetStateAction<CurrentRelativePosition>>,
 }
 
@@ -33,7 +35,11 @@ const SelectionPopupMenu: React.FC<SelectionPopupMenuProps> = ({
   const [position, setPosition] = useState({ top: 0, left: 0 });
   const menuRef = useRef<HTMLDivElement>(null);
 
-  const updatePosition = useCallback(() => {
+  const updatePosition = useCallback((customRelativeAlign: null|RelativeAlign = null) => {
+    if (null === customRelativeAlign) {
+      customRelativeAlign = relativeAlign;
+    }
+
     if (menuRef.current && anchorEl.current) {
       const menuRect = menuRef.current.getBoundingClientRect();
       const anchorRect = anchorEl.current.getBoundingClientRect();
@@ -42,7 +48,7 @@ const SelectionPopupMenu: React.FC<SelectionPopupMenuProps> = ({
       let left = anchorRect.left;
       let relativePosition: CurrentRelativePosition = 'below';
 
-      if (relativeAlign === 'above_or_below') {
+      if (customRelativeAlign === 'above_or_below') {
         // Adjust position if menu goes off screen vertically
         if (top + menuRect.height > window.innerHeight) {
           top = anchorRect.top - menuRect.height;
@@ -59,7 +65,7 @@ const SelectionPopupMenu: React.FC<SelectionPopupMenuProps> = ({
         if (left < 0) {
           left = 0;
         }
-      } else if (relativeAlign === 'left_or_right') {
+      } else if (customRelativeAlign === 'left_or_right') {
         // Position to the right by default
         left = anchorRect.right;
         relativePosition = 'right';
@@ -77,6 +83,11 @@ const SelectionPopupMenu: React.FC<SelectionPopupMenuProps> = ({
         if (top < 0) {
           top = 0;
         }
+
+        if (left + menuRect.width > window.innerWidth || left < 0) {
+          // Adjust to keep popup within window
+          return updatePosition('above_or_below');
+        }
       }
 
       setPosition({ top, left });
@@ -86,9 +97,12 @@ const SelectionPopupMenu: React.FC<SelectionPopupMenuProps> = ({
 
   useEffect(() => {
     updatePosition();
-    if (isOpen) {
-      window.addEventListener('resize', updatePosition);
+    window.addEventListener('resize', () => updatePosition());
+  }, [updatePosition]);
 
+  useEffect(() => {
+    updatePosition();
+    if (isOpen) {
       // Add click event listener to capture clicks outside the popup
       const handleOutsideClick = (event: MouseEvent) => {
         if (menuRef.current && !menuRef.current.contains(event.target as Node) && 
@@ -101,7 +115,7 @@ const SelectionPopupMenu: React.FC<SelectionPopupMenuProps> = ({
       document.addEventListener('click', handleOutsideClick);
 
       return () => {
-        window.removeEventListener('resize', updatePosition);
+        window.removeEventListener('resize', () => updatePosition());
         document.removeEventListener('click', handleOutsideClick);
       };
     }
