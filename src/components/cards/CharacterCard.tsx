@@ -76,7 +76,7 @@ const CharacterCard: React.FC<CharacterCardProps> = ({ character }) => {
       <div className="w-2/3 p-2 flex flex-col justify-between">
         <div>
           <h2 className="text-base font-bold mb-0.5 break-words whitespace-nowrap overflow-hidden text-ellipsis">{character.name}</h2>
-          <p className="text-xs text-gray-500 mb-1 break-words whitespace-nowrap overflow-hidden text-ellipsis">by {truncateCreator("Admin")}</p>
+          <p className="text-xs text-gray-500 mb-1 break-words whitespace-nowrap overflow-hidden text-ellipsis">by {truncateCreator(character.creator_user.display_name)}</p>
           <p className="text-xs text-gray-700 mb-2 break-words whitespace-normal line-clamp-2">{truncateText(character.description, 2)}</p>
         </div>
         <div className="flex items-center flex-wrap mt-1">
