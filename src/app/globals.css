@@ -36,3 +36,8 @@ body {
     scrollbar-width: none;  /* Firefox */
   }
 }
+
+html, body {
+  min-height: 100vh !important;
+  overflow-y: scroll !important;
+}

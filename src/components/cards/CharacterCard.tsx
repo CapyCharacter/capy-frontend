@@ -1,23 +1,15 @@
 'use client';
 
+import { CharacterInfo } from '@/utils/backend/schemas/CharacterInfo';
 import Image from 'next/image';
 import { useState, useRef } from 'react';
-
+import { useRouter } from 'next/navigation';
 interface CharacterCardProps {
-  name: string;
-  creator: string;
-  description: string;
-  chats: number;
-  avatarUrl: string;
+  character: CharacterInfo;
 }
 
-const CharacterCard: React.FC<CharacterCardProps> = ({
-  name,
-  creator,
-  description,
-  chats,
-  avatarUrl,
-}) => {
+const CharacterCard: React.FC<CharacterCardProps> = ({ character }) => {
+  const router = useRouter();
   const [isDragging, setIsDragging] = useState(false);
   const dragStartPos = useRef<{ x: number; y: number } | null>(null);
 
@@ -46,7 +38,7 @@ const CharacterCard: React.FC<CharacterCardProps> = ({
 
   const handleClick = () => {
     if (!isDragging) {
-      alert(`You clicked on ${name}'s card!`);
+      router.push(`/chat/${character.id}`);
     }
   };
 
@@ -79,17 +71,17 @@ const CharacterCard: React.FC<CharacterCardProps> = ({
       onMouseLeave={handleMouseUp}
     >
       <div className="w-1/3 relative m-3">
-        <Image src={avatarUrl} alt={`${name}'s avatar`} layout="fill" objectFit="cover" className="rounded-lg" draggable="false" />
+        <Image src={character.avatar_url || "/images/icons/default-user-avatar.png"} alt={`${character.name}'s avatar`} layout="fill" objectFit="cover" className="rounded-lg" draggable="false" />
       </div>
       <div className="w-2/3 p-2 flex flex-col justify-between">
         <div>
-          <h2 className="text-base font-bold mb-0.5 break-words whitespace-nowrap overflow-hidden text-ellipsis">{name}</h2>
-          <p className="text-xs text-gray-500 mb-1 break-words whitespace-nowrap overflow-hidden text-ellipsis">by {truncateCreator(creator)}</p>
-          <p className="text-xs text-gray-700 mb-2 break-words whitespace-normal line-clamp-2">{truncateText(description, 2)}</p>
+          <h2 className="text-base font-bold mb-0.5 break-words whitespace-nowrap overflow-hidden text-ellipsis">{character.name}</h2>
+          <p className="text-xs text-gray-500 mb-1 break-words whitespace-nowrap overflow-hidden text-ellipsis">by {truncateCreator("Admin")}</p>
+          <p className="text-xs text-gray-700 mb-2 break-words whitespace-normal line-clamp-2">{truncateText(character.description, 2)}</p>
         </div>
         <div className="flex items-center flex-wrap mt-1">
           <Image src="/images/icons/chat-bubble.svg" alt="Chat icon" width={12} height={12} className="mr-1" draggable="false" />
-          <span className="text-xs text-gray-500 break-words whitespace-normal line-clamp-2">{chats}</span>
+          <span className="text-xs text-gray-500 break-words whitespace-normal line-clamp-2">{character.num_chats}</span>
         </div>
       </div>
     </div>

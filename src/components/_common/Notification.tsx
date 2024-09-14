@@ -65,7 +65,7 @@ const Notification = ({ message, onClose }: { message: string; onClose: () => vo
     return (
         <div className="fixed top-0 left-0 right-0 bg-green-500 text-white p-4 text-center z-50">
             {message}
-            <button onClick={onClose} className="ml-4 text-white font-bold">Dismiss</button>
+            <button type="button" onClick={onClose} className="ml-4 text-white font-bold">Dismiss</button>
         </div>
     );
 };

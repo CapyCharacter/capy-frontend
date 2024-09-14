@@ -5,6 +5,8 @@ import { UserLoginInfo } from '@/utils/backend/schemas/UserLoginInfo';
 import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 
 type AuthContextType = {
+    isAuthenticated: null;
+} | {
     isAuthenticated: false;
 } | ({
     isAuthenticated: true;
@@ -17,7 +19,7 @@ type AuthContextData = {
 
 const AuthContext = createContext<AuthContextData>({
     auth: {
-        isAuthenticated: false,
+        isAuthenticated: null,
     },
     setAuth: () => {},
 });
@@ -44,7 +46,7 @@ interface AuthProviderProps {
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     const [auth, setAuth] = useState<AuthContextType>({
-        isAuthenticated: false,
+        isAuthenticated: null,
     });
 
     useEffect(() => {
@@ -56,6 +58,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
                     user: data.user,
                 });
             }
+        }).catch(() => {
+            setAuth({
+                isAuthenticated: false,
+            });
         });
     }, []);
 

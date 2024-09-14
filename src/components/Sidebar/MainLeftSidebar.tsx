@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import { useMobileContext } from "../_common/MobileDetectionProvider";
 import Button from "@/components/_common/Button";
@@ -13,6 +13,9 @@ import { useAuth, useSetAuth } from "../_common/AuthProvider";
 import { useRouter } from "next/navigation";
 import { callAuthLogout } from "@/utils/backend/callAuthLogout";
 import { useGlobalContext } from "../_common/GlobalContextProvider";
+import { CharacterInfo } from "@/utils/backend/schemas/CharacterInfo";
+import { callRecentCharactersGet, callThisWeekCharactersGet } from "@/utils/backend/callCharactersGet";
+import { createNotification } from "../_common/Notification";
 
 interface EverySectionProps {
   closeSidebar: () => void;
@@ -33,12 +36,15 @@ const HomeButton = ({ closeSidebar }: EverySectionProps) => (
 
 // Section 2: Create Button
 const CreateButton = ({ closeSidebar }: EverySectionProps) => {
+  const router = useRouter();
+
   const submenuItems = [
     {
       label: "Character",
       icon: "/images/icons/new-character.svg",
       onClick: () => {
         closeSidebar();
+        router.push('/characters/create');
       },
     },
     {
@@ -46,6 +52,7 @@ const CreateButton = ({ closeSidebar }: EverySectionProps) => {
       icon: "/images/icons/new-voice.svg",
       onClick: () => {
         closeSidebar();
+        router.push('/voices/create');
       },
     },
   ];
@@ -92,7 +99,7 @@ const SuggestedConversations = ({ closeSidebar }: EverySectionProps) => {
   const auth = useAuth();
 
   return (
-    auth.isAuthenticated ? (
+    auth.isAuthenticated === true ? (
       <div className="flex-grow overflow-y-auto">
         <SidebarSection title="Conversations">
           <SidebarSubsection title="Recent">
@@ -100,7 +107,7 @@ const SuggestedConversations = ({ closeSidebar }: EverySectionProps) => {
           </SidebarSubsection>
 
           <SidebarSubsection title="This Week">
-            <RecentCharacters closeSidebar={closeSidebar} />
+            <ThisWeekCharacters closeSidebar={closeSidebar} />
           </SidebarSubsection>
         </SidebarSection>
       </div>
@@ -119,25 +126,35 @@ const SuggestedConversations = ({ closeSidebar }: EverySectionProps) => {
   );
 };
 
-// Section 5: Recent Characters
+// Section 4.1: Recent Characters
 const RecentCharacters = ({ closeSidebar }: EverySectionProps) => {
-  const characters = [
-    { id: 1, name: "Character 1" },
-    { id: 2, name: "Character 2" },
-    { id: 3, name: "Character 3" },
-  ];
+  const [recentCharacters, setRecentCharacters] = useState([] as CharacterInfo[]);
+  const router = useRouter();
+
+  useEffect(() => {
+    callRecentCharactersGet().then((characters) => {
+      if (characters instanceof Error) {
+        createNotification(characters.message);
+      } else {
+        setRecentCharacters(characters);
+      }
+    });
+  }, []);
 
   return (
     <div className="w-full px-4 py-2">
-      {characters.map((char) => (
-        <div key={char.id} className="mb-2 last:mb-0">
+      {recentCharacters.map((character) => (
+        <div key={character.id} className="mb-2 last:mb-0">
           <Button
-            label={char.name}
+            label={character.name}
             variant="void"
-            icon="/images/fake-character-image.avif"
+            icon={character.avatar_url}
             className="w-full"
             roundIcon
-            onClick={closeSidebar}
+            onClick={() => {
+              closeSidebar();
+              router.push(`/chat/${character.id}`);
+            }}
           />
         </div>
       ))}
@@ -145,7 +162,43 @@ const RecentCharacters = ({ closeSidebar }: EverySectionProps) => {
   );
 };
 
-// Section 6: User Profile
+// Section 4.2: This Week Characters
+const ThisWeekCharacters = ({ closeSidebar }: EverySectionProps) => {
+  const [thisWeekCharacters, setThisWeekCharacters] = useState([] as CharacterInfo[]);
+  const router = useRouter();
+
+  useEffect(() => {
+    callThisWeekCharactersGet().then((characters) => {
+      if (characters instanceof Error) {
+        createNotification(characters.message);
+      } else {
+        setThisWeekCharacters(characters);
+      }
+    });
+  }, []);
+
+  return (
+    <div className="w-full px-4 py-2">
+      {thisWeekCharacters.map((character) => (
+        <div key={character.id} className="mb-2 last:mb-0">
+          <Button
+            label={character.name}
+            variant="void"
+            icon={character.avatar_url}
+            className="w-full"
+            roundIcon
+            onClick={() => {
+              closeSidebar();
+              router.push(`/chat/${character.id}`);
+            }}
+          />
+        </div>
+      ))}
+    </div>
+  );
+};
+
+// Section 5: User Profile
 const UserProfile = ({ closeSidebar }: EverySectionProps) => {
   const router = useRouter();
   const auth = useAuth();
@@ -185,7 +238,7 @@ const UserProfile = ({ closeSidebar }: EverySectionProps) => {
 
   return (
     <div className="px-4 py-2">
-      {auth.isAuthenticated ? (
+      {auth.isAuthenticated === true ? (
         <Button
           label={auth.user.display_name}
           variant="primary"
@@ -225,7 +278,7 @@ const MainLeftSidebar = () => {
   return (
     <>
       {isMobile && (
-        <button
+        <button type="button"
           onClick={() => setIsLeftSidebarOpen(!isLeftSidebarOpen)}
           className={`
             ${isMobile ? `fixed top-3 left-3` : `relative ml-5`}

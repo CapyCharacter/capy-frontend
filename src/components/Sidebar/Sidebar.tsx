@@ -46,7 +46,7 @@ const Sidebar: React.FC<SidebarProps> = ({
       `}>
         <div className="flex flex-col h-full relative">
           {isMobile && toggleableOnMobile && (
-            <button
+            <button type="button"
               onClick={() => {
                 setIsOpen(false);
                 forceCloseAllPopups();

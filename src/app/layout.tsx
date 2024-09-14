@@ -22,7 +22,7 @@ export default function RootLayout({
         <MobileDetectionProvider>
           <html lang="en">
             <NotificationProvider>
-              <body>
+              <body className="h-screen">
                 <div className="min-h-screen bg-gray-100">
                   <MainLeftSidebar />
                   <main className="md:pl-72 lg:pl-80">{children}</main>

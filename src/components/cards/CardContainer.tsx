@@ -41,15 +41,6 @@ const CardContainer = ({ children } : {
       e.preventDefault();
     };
 
-    const addEmptySpace = () => {
-      const emptySpace = document.createElement('div');
-      emptySpace.style.minWidth = '100px';
-      emptySpace.style.height = '1px';
-      content.appendChild(emptySpace);
-    };
-
-    addEmptySpace();
-
     container.addEventListener('mousedown', onMouseDown);
     window.addEventListener('mouseup', onMouseUp);
     window.addEventListener('mousemove', onMouseMove);

@@ -1,12 +1,13 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth, useSetAuth } from '@/components/_common/AuthProvider';
 import Button from '@/components/_common/Button';
 import { callAuthLogin } from '@/utils/backend/callAuthLogin';
 import Link from 'next/link';
 import { useGlobalContext } from '@/components/_common/GlobalContextProvider';
+import { createNotification } from '@/components/_common/Notification';
 
 const LoginPage: React.FC = () => {
     const [email, setEmail] = useState('');
@@ -16,8 +17,15 @@ const LoginPage: React.FC = () => {
     const auth = useAuth();
     const setAuth = useSetAuth();
     const searchParams = useSearchParams();
-    const registrationSuccess = searchParams.get('registrationSuccess') === 'true';
     const { setJustLoggedIn } = useGlobalContext();
+
+    useEffect(() => {
+        const registrationSuccess = searchParams.get('registrationSuccess') === 'true';
+        if (registrationSuccess) {
+            createNotification("Registration successful! Please login!");
+            history.replaceState(null, '', '/login');
+        }
+    }, [searchParams, router]);
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -41,7 +49,7 @@ const LoginPage: React.FC = () => {
         }
     };
 
-    if (auth.isAuthenticated) {
+    if (auth.isAuthenticated === true) {
         router.push('/'); // Redirect to home if already logged in
         return null;
     }
@@ -53,11 +61,6 @@ const LoginPage: React.FC = () => {
                     <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
                         Sign in to your account
                     </h2>
-                    {registrationSuccess && (
-                        <p className="mt-2 text-center text-sm text-green-600">
-                            Registration successful, please login
-                        </p>
-                    )}
                 </div>
                 <div className="mt-8 bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
                     <LoginForm onSubmit={handleLogin} error={error} email={email} setEmail={setEmail} password={password} setPassword={setPassword} />

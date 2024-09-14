@@ -44,7 +44,6 @@ const SelectionPopupMenu: React.FC<SelectionPopupMenuProps> = ({
     }
 
     if (menuRef.current && anchorEl.current) {
-      console.log('updatePosition');
       const menuRect = menuRef.current.getBoundingClientRect();
       const anchorRect = anchorEl.current.getBoundingClientRect();
       
@@ -110,7 +109,6 @@ const SelectionPopupMenu: React.FC<SelectionPopupMenuProps> = ({
     const handleMessage = (event: MessageEvent) => {
       if (event.data && event.data.type === POPUP_STATE_CHANGE_EVENT) {
         setTimeout(() => {
-          console.log('updatePosition FINAL');
           updatePosition();
         }, 200);
       }
@@ -160,14 +158,15 @@ const SelectionPopupMenu: React.FC<SelectionPopupMenuProps> = ({
       style={{
         top: `${position.top}px`,
         left: `${position.left}px`,
-        zIndex: 9999,
         minWidth: '220px',
+        zIndex: 1000,
         opacity: isOpen ? 1 : 0,
+        visibility: isOpen ? 'visible' : 'hidden',
         transition: 'all 0.2s ease-in-out',
       }}
     >
       {items.map((item, index) => (
-        <button
+        <button type="button"
           key={index}
           className="flex items-center w-full px-4 py-2 mb-1 last:mb-0 text-left hover:bg-gray-100 transition-colors duration-150 ease-in-out rounded-lg"
           onClick={(e) => {

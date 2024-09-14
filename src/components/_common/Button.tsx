@@ -5,9 +5,9 @@ import Image from 'next/image';
 import SelectionPopupMenu, { CurrentRelativePosition } from './SelectionPopupMenu';
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: 'primary' | 'secondary' | 'void';
-  icon?: string;
-  label: string;
+  variant?: 'primary' | 'secondary' | 'void' | 'very_primary';
+  icon?: string | React.ReactNode;
+  label: string | React.ReactNode;
   iconPosition?: 'left' | 'right';
   submenuItems?: Array<{
     label: string;
@@ -48,6 +48,7 @@ const Button = ({
     primary: 'bg-gray-100 text-gray-800 hover:bg-gray-200',
     secondary: 'bg-white text-gray-800 hover:bg-gray-100',
     void: 'bg-transparent text-gray-800 hover:bg-gray-100',
+    very_primary: 'bg-gray-900 text-gray-100 hover:bg-gray-800',
   };
   const shapeClasses = {
     capsule: 'rounded-full',
@@ -88,18 +89,26 @@ const Button = ({
 
   return (
     <>
-      <button
+      <button type="button"
         ref={buttonRef}
         className={`${baseClasses} ${variantClasses[variant]} ${shapeClasses[shape]} ${className} relative ${centerText ? 'justify-center' : ''}`}
         onClick={handleClick}
         {...props}
       >
         {icon && iconPosition === 'left' && (
-          <Image src={icon} alt="" width={iconSize} height={iconSize} className={`mr-2 ${iconClasses}`} />
+          typeof icon === 'string' ? (
+            <Image src={icon} alt="" width={iconSize} height={iconSize} className={`mr-2 ${iconClasses}`} />
+          ) : (
+            icon
+          )
         )}
         <span className={centerText ? 'flex-grow text-center' : ''}>{label}</span>
         {icon && iconPosition === 'right' && (
-          <Image src={icon} alt="" width={iconSize} height={iconSize} className={`ml-2 ${iconClasses}`} />
+          typeof icon === 'string' ? (
+            <Image src={icon} alt="" width={iconSize} height={iconSize} className={`ml-2 ${iconClasses}`} />
+          ) : (
+            icon
+          )
         )}
         {submenuItems && !expandPopupMenuOnClick && (
           <span className="ml-auto" onClick={handleSubmenuToggle}>
