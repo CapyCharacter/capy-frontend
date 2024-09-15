@@ -87,12 +87,9 @@ const EditCharacterPage: React.FC<{ params: { character_id: string } }> = ({ par
                 console.error('Failed to update character:', result.message);
                 setSubmitError(result.message);
             } else {
-                console.log('Character updated successfully:', result);
                 createNotification("Your character has been updated successfully!");
                 router.push('/characters');
             }
-        } else {
-            console.log('Form has errors. Please correct them.');
         }
     };
 

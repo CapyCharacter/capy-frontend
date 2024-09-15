@@ -45,12 +45,9 @@ const CreateVoicePage: React.FC = () => {
                 console.error('Failed to create voice:', result.message);
                 setSubmitError(result.message);
             } else {
-                console.log('Voice created successfully:', result);
                 createNotification("Your voice has been created successfully!");
                 router.push('/voices');
             }
-        } else {
-            console.log('Form has errors. Please correct them.');
         }
     };
 

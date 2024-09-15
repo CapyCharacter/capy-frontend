@@ -45,7 +45,6 @@ const CreateCharacterPage: React.FC = () => {
         ////////////////////////////////////
 
         if (hasErrors || voice === null) {
-            console.log('Form has errors. Please correct them.');
             return;
         }
 
@@ -107,8 +106,8 @@ const CreateCharacterPage: React.FC = () => {
                                     height={0}
                                     style={{ height: 'auto' }}
                                     className="rounded"
-                                    onLoad={() => { setIsImageLoaded(true); console.log('Image loaded'); }}
-                                    onError={() => { setIsImageLoaded(false); console.log('Image error'); }}
+                                    onLoad={() => setIsImageLoaded(true)}
+                                    onError={() => setIsImageLoaded(false)}
                                 />
                             </div>
                         )}

@@ -6,6 +6,11 @@ type AIServiceInputFromFrontend = {
     conversation_id: number;
     latest_message_content: string;
     token: string;
+} | {
+    type: "VoiceCall";
+    conversation_id: number;
+    input_audio_wav: ArrayBuffer;
+    token: string;
 };
 
 type AIServiceOutput = {
@@ -13,44 +18,43 @@ type AIServiceOutput = {
     error: false;
     new_data: string;
 } | {
+    is_finished: boolean;
+    error: false;
+    output_audio_wav: ArrayBuffer;
+} | {
     is_finished: true;
     error: string;
 };
 
 export const callAIService = (
-  input: AIServiceInputFromFrontend,
-  callback: (output: AIServiceOutput) => void
+    input: AIServiceInputFromFrontend,
+    callback: (output: AIServiceOutput) => void
 ): void => {
-  const socket: Socket = io(BACKEND_URL || '', {
-    auth: {
-      token: input.token,
-    },
-  });
+    const socket: Socket = io(BACKEND_URL || '', {
+        auth: {
+            token: input.token,
+        },
+    });
 
-  socket.on('connect_error', (error) => {
-    console.error('Connection error:', error);
-    callback({ is_finished: true, error: 'Connection error: ' + error });
-    socket.disconnect();
-  });
+    socket.on('connect_error', (error) => {
+        console.error('Connection error:', error);
+        callback({ is_finished: true, error: 'Connection error: ' + error });
+        socket.disconnect();
+    });
 
-  socket.on('connect', () => {
-    console.log('Connected to AI service');
-    socket.emit('message', input);
-  });
+    socket.on('connect', () => {
+        socket.emit('message', input);
+    });
 
-  socket.on('message', (output: AIServiceOutput) => {
-    callback(output);
+    socket.on('message', (output: AIServiceOutput) => {
+        callback(output);
 
-    if (output.is_finished) {
-      socket.disconnect();
-    }
-  });
+        if (output.is_finished) {
+            socket.disconnect();
+        }
+    });
 
-  socket.on('disconnect', () => {
-    console.log('Disconnected from AI service');
-  });
-
-  socket.on('error', (error: Error) => {
-    console.error('Socket error:', error);
-  });
+    socket.on('error', (error: Error) => {
+        console.error('Socket error:', error);
+    });
 };

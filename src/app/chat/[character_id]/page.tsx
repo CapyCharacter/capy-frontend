@@ -12,6 +12,7 @@ import { ConversationInfo } from '@/utils/backend/schemas/ConversationInfo';
 import { callGetMessagesByConversation } from '@/utils/backend/CallGetMessagesByConversation';
 import { callCharacterGetById } from '@/utils/backend/callCharacterGetById';
 import UnauthenticatedPage from '@/components/_common/UnauthenticatedPage';
+import { VoiceCallFullscreen } from '@/components/VoiceCall/VoiceCall';
 
 interface ChatPageProps {
   params: { character_id: string };
@@ -20,17 +21,20 @@ interface ChatPageProps {
 interface MessageData {
   content: string;
   sentByUser: boolean;
+  id: number | null;
 }
 
 const ChatPage: React.FC<ChatPageProps> = ({ params: { character_id } }) => {
   const auth = useAuth();
 
+  const [isVoiceCalling, setIsVoiceCalling] = useState(false);
   const [messages, setMessages] = useState<MessageData[]>([]);
   const [firstMessageContentByAI, setFirstMessageContentByAI] = useState<string>('');
   const [latestMessageContentByAI, setLatestMessageContentByAI] = useState<string>('');
   const isMobile = useMobileContext();
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [conversation, setConversation] = useState<ConversationInfo | null | false>(null);
+  const [audioContext, setAudioContext] = useState<AudioContext | null>(null);
 
   const [waitingForFirstResponseByte, setWaitingForFirstResponseByte] = useState<boolean>(false);
 
@@ -40,6 +44,10 @@ const ChatPage: React.FC<ChatPageProps> = ({ params: { character_id } }) => {
 
   useEffect(() => {
     if (!auth.isAuthenticated) {
+      return;
+    }
+
+    if (isVoiceCalling) {
       return;
     }
 
@@ -76,7 +84,7 @@ const ChatPage: React.FC<ChatPageProps> = ({ params: { character_id } }) => {
           return;
         }
 
-        setMessages(messages.map((message) => ({ content: message.content, sentByUser: message.sent_by_user })));
+        setMessages(messages.map((message) => ({ content: message.content, sentByUser: message.sent_by_user, id: message.id })));
         scrollToBottom();
       }).catch((error) => {
         console.error(error);
@@ -86,7 +94,7 @@ const ChatPage: React.FC<ChatPageProps> = ({ params: { character_id } }) => {
       console.error(error);
       setConversation(false);
     });
-  }, [auth, character_id]);
+  }, [auth, character_id, isVoiceCalling]);
 
   useEffect(() => {
     scrollToBottom();
@@ -109,14 +117,18 @@ const ChatPage: React.FC<ChatPageProps> = ({ params: { character_id } }) => {
       setWaitingForFirstResponseByte(false);
       if (output.is_finished === true) {
         if (output.error === false) {
-          latestMessageContent += output.new_data;
-          setMessages(previousMessages => [...previousMessages, { content: latestMessageContent, sentByUser: false }]);
+          if ('new_data' in output) {
+            latestMessageContent += output.new_data;
+          }
+          setMessages(previousMessages => [...previousMessages, { content: latestMessageContent, sentByUser: false, id: null }]);
         } else {
-          setMessages(previousMessages => [...previousMessages, { content: output.error, sentByUser: false }]);
+          setMessages(previousMessages => [...previousMessages, { content: output.error, sentByUser: false, id: null }]);
         }
         setLatestMessageContentByAI('');
       } else {
-        latestMessageContent += output.new_data;
+        if ('new_data' in output) {
+          latestMessageContent += output.new_data;
+        }
         setLatestMessageContentByAI(latestMessageContent);
       }
     });
@@ -129,10 +141,10 @@ const ChatPage: React.FC<ChatPageProps> = ({ params: { character_id } }) => {
 
     getResponseMessageFromAI(userMessage);
 
-    setMessages(previousMessages => [...previousMessages, { content: userMessage, sentByUser: true }]);
+    setMessages(previousMessages => [...previousMessages, { content: userMessage, sentByUser: true, id: null }]);
   }, [conversation, auth, getResponseMessageFromAI, setMessages]);
 
-  return auth.isAuthenticated ? (
+  return auth.isAuthenticated ? (<>
     <div className="flex flex-col h-screen">
       <div className="flex flex-col h-full max-w-4xl w-full mx-auto relative">
         <div className="relative overflow-auto mb-20">
@@ -142,6 +154,7 @@ const ChatPage: React.FC<ChatPageProps> = ({ params: { character_id } }) => {
             />
             {firstMessageContentByAI && (
               <Message
+                messageId={null}
                 content={firstMessageContentByAI}
                 avatarSrc={(conversation && conversation.character && conversation.character.avatar_url) || "/images/default-user-avatar.png"}
                 senderName={(conversation && conversation.character && conversation.character.name) || "Unknown"}
@@ -151,6 +164,7 @@ const ChatPage: React.FC<ChatPageProps> = ({ params: { character_id } }) => {
             {messages.map((message, index) => (
               <Message
                 key={index}
+                messageId={message.id ? message.id.toString() : null}
                 content={message.content}
                 avatarSrc={message.sentByUser
                   ? (auth.isAuthenticated === true && auth.user.avatar_url ? auth.user.avatar_url : "/images/default-user-avatar.png")
@@ -162,6 +176,7 @@ const ChatPage: React.FC<ChatPageProps> = ({ params: { character_id } }) => {
             <div ref={messagesEndRef} />
             {latestMessageContentByAI && (
               <Message
+                messageId={null}
                 content={latestMessageContentByAI}
                 avatarSrc={(conversation && conversation.character && conversation.character.avatar_url) ? conversation.character.avatar_url : "/images/default-user-avatar.png"}
                 senderName={(conversation && conversation.character && conversation.character.name) ? conversation.character.name : "Unknown"}
@@ -179,12 +194,42 @@ const ChatPage: React.FC<ChatPageProps> = ({ params: { character_id } }) => {
         </div>
         <div className="w-full absolute bottom-0">
           <div className="p-4 w-full">
-            <MessageInput onSendMessage={handleSendMessage} />
+            <MessageInput onSendMessage={handleSendMessage} startVoiceCall={() => {
+              const newAudioContext = new AudioContext();
+
+              newAudioContext.resume();
+
+
+              const oscillator = newAudioContext.createOscillator(); // Example of creating an oscillator
+              const gainNode = newAudioContext.createGain();
+
+              oscillator.connect(gainNode);
+              gainNode.connect(newAudioContext.destination);
+
+              oscillator.frequency.value = 440; // Set frequency to 440 Hz
+              gainNode.gain.value = 0.5; // Set volume to 50%
+
+              oscillator.start();
+
+              setAudioContext(newAudioContext);
+              setIsVoiceCalling(true);
+            }} />
           </div>
         </div>
       </div>
     </div>
-  ) : (
+
+    {<VoiceCallFullscreen
+      conversation={conversation}
+      audioContext={audioContext}
+      onClose={() => {
+        setIsVoiceCalling(false);
+        setAudioContext(null);
+      }}
+      open={isVoiceCalling}
+    />}
+    
+  </>) : (
     <UnauthenticatedPage />
   );
 };

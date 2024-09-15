@@ -74,12 +74,9 @@ const EditVoicePage: React.FC<{ params: { voice_id: string } }> = ({ params }) =
                 console.error('Failed to update voice:', result.message);
                 setSubmitError(result.message);
             } else {
-                console.log('Voice updated successfully:', result);
                 createNotification("Your voice has been updated successfully!");
                 router.push('/voices');
             }
-        } else {
-            console.log('Form has errors. Please correct them.');
         }
     };
 

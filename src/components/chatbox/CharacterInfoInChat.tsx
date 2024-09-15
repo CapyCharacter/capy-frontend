@@ -15,8 +15,6 @@ const CharacterInfoInChat: React.FC<CharacterInfoInChatProps> = ({ character }) 
   const [creator, setCreator] = useState('');
   const isMobile = useMobileContext();
 
-  console.log(character);
-
   const name = (character ? character.name : '');
   const description = (character ? character.description : '');
   const avatarUrl = (character ? character.avatar_url : '/images/default-user-avatar.png');
